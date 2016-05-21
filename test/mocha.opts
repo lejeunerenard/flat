@@ -1,0 +1,5 @@
+test/unit/**/*.js
+--recursive
+-r test/helper.js
+-r babel-polyfill
+--compilers js:babel-register
