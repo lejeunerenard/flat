@@ -18,6 +18,10 @@ var _fs = require('fs');
 
 var _fs2 = _interopRequireDefault(_fs);
 
+var _recursiveReaddir = require('recursive-readdir');
+
+var _recursiveReaddir2 = _interopRequireDefault(_recursiveReaddir);
+
 var _path = require('path');
 
 var _path2 = _interopRequireDefault(_path);
@@ -57,14 +61,10 @@ var Flat = function () {
       var _this = this;
 
       return new Promise(function (resolve, reject) {
-        _fs2.default.readdir(_this.contentDir, function (err, files) {
+        (0, _recursiveReaddir2.default)(_this.contentDir, function (err, files) {
           if (err) {
             return reject(err);
           }
-
-          files = files.map(function (file) {
-            return _path2.default.join(_this.contentDir, file);
-          });
 
           resolve(files);
         });

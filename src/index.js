@@ -1,6 +1,7 @@
 import Remarkable from 'remarkable'
 import assign from 'object-assign'
 import fs from 'fs'
+import recursive from 'recursive-readdir'
 import path from 'path'
 import defined from 'defined'
 
@@ -23,12 +24,10 @@ export default class Flat {
 
   getContent () {
     return new Promise((resolve, reject) => {
-      fs.readdir(this.contentDir, (err, files) => {
+      recursive(this.contentDir, (err, files) => {
         if (err) {
           return reject(err)
         }
-
-        files = files.map((file) => path.join(this.contentDir, file))
 
         resolve(files)
       })

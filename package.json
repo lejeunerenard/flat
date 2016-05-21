@@ -50,6 +50,7 @@
   "dependencies": {
     "defined": "^1.0.0",
     "object-assign": "^4.1.0",
+    "recursive-readdir": "^2.0.0",
     "remarkable": "^1.6.2"
   }
 }

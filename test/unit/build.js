@@ -2,6 +2,7 @@ import Flat from '../../src/'
 
 import path from 'path'
 import copy from 'recursive-copy'
+import recursive from 'recursive-readdir'
 import temp from 'temp'
 
 let fixtureSrc = path.join(__dirname, '../', 'site')
@@ -26,11 +27,23 @@ describe('build process', function () {
   let flat
   let expectedFiles = []
 
-  beforeEach(function () {
+  beforeEach(function (done) {
     flat = new Flat({ rootDir: fixture })
 
-    let filename = path.join(fixture, 'public', 'content', 'hello-world.html')
-    expectedFiles.push(filename)
+    recursive(flat.contentDir, (err, files) => {
+      if (err) {
+        throw new Error(err)
+      }
+
+      files.forEach((file) => {
+        let name = path.parse(file).name
+
+        let filename = path.join(flat.publicDir, 'content', `${name}.html`)
+        expectedFiles.push(filename)
+      })
+
+      done()
+    })
   })
 
   it('creates a file for each content file', function () {
