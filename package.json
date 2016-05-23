@@ -4,8 +4,8 @@
   "description": "Flexible Flat site generator w/ ajax content loading support.",
   "main": "dist/index.js",
   "scripts": {
-    "build": "babel src/index.js > dist/index.js",
-    "build:watch": "babel --watch src/index.js -o dist/index.js",
+    "build": "babel -d dist/ src/",
+    "build:watch": "babel --watch -d dist/ src/",
     "test": "mocha --opts ./test/mocha.opts"
   },
   "keywords": [],
@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "defined": "^1.0.0",
+    "mustache": "^2.2.1",
     "object-assign": "^4.1.0",
     "recursive-readdir": "^2.0.0",
     "remarkable": "^1.6.2"
