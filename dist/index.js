@@ -14,10 +14,6 @@ var _objectAssign = require('object-assign');
 
 var _objectAssign2 = _interopRequireDefault(_objectAssign);
 
-var _fs = require('fs');
-
-var _fs2 = _interopRequireDefault(_fs);
-
 var _recursiveReaddir = require('recursive-readdir');
 
 var _recursiveReaddir2 = _interopRequireDefault(_recursiveReaddir);
@@ -29,6 +25,12 @@ var _path2 = _interopRequireDefault(_path);
 var _defined = require('defined');
 
 var _defined2 = _interopRequireDefault(_defined);
+
+var _mustache = require('mustache');
+
+var _mustache2 = _interopRequireDefault(_mustache);
+
+var _filePromise = require('./file-promise');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -47,11 +49,17 @@ var Flat = function () {
     contentDir = _path2.default.join(rootDir, contentDir);
     var publicDir = (0, _defined2.default)(opt.publicDir, 'public');
     publicDir = _path2.default.join(rootDir, publicDir);
+    var layout = opt.layout;
+
+    if (!layout) {
+      throw new Error('A layout is required');
+    }
 
     (0, _objectAssign2.default)(this, {
       rootDir: rootDir,
       contentDir: contentDir,
-      publicDir: publicDir
+      publicDir: publicDir,
+      layout: layout
     });
   }
 
@@ -76,29 +84,25 @@ var Flat = function () {
       var _this2 = this;
 
       var mdDones = contents.map(function (content) {
-        return new Promise(function (resolve, reject) {
-          var name = _path2.default.parse(content).name;
+        var name = _path2.default.parse(content).name;
+        var contentPath = _path2.default.join(_this2.publicDir, 'content', name + '.html');
+        var flatPath = _path2.default.join(_this2.publicDir, name + '.html');
 
-          _fs2.default.readFile(content, 'utf8', function (err, markdown) {
-            if (err) {
-              return reject(err);
-            }
-
-            var html = md.render(markdown);
-            var compiledPath = _path2.default.join(_this2.publicDir, 'content', name + '.html');
-
-            _fs2.default.writeFile(compiledPath, html, function (err) {
-              if (err) {
-                return reject(err);
-              }
-
-              resolve(compiledPath);
-            });
-          });
+        return (0, _filePromise.readFile)(content, 'utf8').then(md.render.bind(md)).then(function (html) {
+          return Promise.all([(0, _filePromise.writeFile)(contentPath, html), _this2.wrapLayout(html).then(function (layoutHTML) {
+            return (0, _filePromise.writeFile)(flatPath, layoutHTML);
+          })]);
         });
       });
 
       return Promise.all(mdDones);
+    }
+  }, {
+    key: 'wrapLayout',
+    value: function wrapLayout(html) {
+      return (0, _filePromise.readFile)(this.layout, 'utf8').then(function (template) {
+        return _mustache2.default.render(template, { content: html });
+      });
     }
   }, {
     key: 'build',

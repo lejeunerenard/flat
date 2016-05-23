@@ -25,11 +25,16 @@ before(function (done) {
 
 describe('build process', function () {
   let flat
-  let expectedFiles = []
+  let expectedContentFiles
+  let expectedFlatFiles
 
   beforeEach(function (done) {
-    flat = new Flat({ rootDir: fixture })
+    flat = new Flat({
+      rootDir: fixture,
+      layout: path.join(fixture, 'layout.html') })
 
+    expectedContentFiles = []
+    expectedFlatFiles = []
     recursive(flat.contentDir, (err, files) => {
       if (err) {
         throw new Error(err)
@@ -39,7 +44,10 @@ describe('build process', function () {
         let name = path.parse(file).name
 
         let filename = path.join(flat.publicDir, 'content', `${name}.html`)
-        expectedFiles.push(filename)
+        expectedContentFiles.push(filename)
+
+        let flatFile = path.join(flat.publicDir, `${name}.html`)
+        expectedFlatFiles.push(flatFile)
       })
 
       done()
@@ -48,7 +56,7 @@ describe('build process', function () {
 
   it('creates a file for each content file', function () {
     return flat.build().then(() => {
-      expectedFiles.forEach((output) => {
+      expectedContentFiles.forEach((output) => {
         expect(file(output)).to.exist
       })
     })
@@ -56,9 +64,17 @@ describe('build process', function () {
 
   it('creates html files', function () {
     return flat.build().then(() => {
-      expectedFiles.forEach((output) => {
+      expectedContentFiles.forEach((output) => {
         expect(file(output))
           .to.contain('<h1>Hello World</h1>')
+      })
+    })
+  })
+
+  it('wraps files in layout', function () {
+    return flat.build().then(() => {
+      expectedFlatFiles.forEach((output) => {
+        expect(file(output)).to.contain('<body>')
       })
     })
   })
