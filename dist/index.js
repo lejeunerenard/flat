@@ -115,3 +115,4 @@ var Flat = function () {
 }();
 
 exports.default = Flat;
+module.exports = exports['default'];
